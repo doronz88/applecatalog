@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os
 
 BASE_DIR = os.path.realpath(os.path.dirname(__file__))
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 
 
 def parse_requirements():
@@ -39,12 +39,13 @@ if __name__ == '__main__':
                                 ],
         },
         classifiers=[
+            'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
         ],
-        url='https://github.com/doronz88/apple-catalog',
+        url='https://github.com/doronz88/applecatalog',
         project_urls={
-            'pymobiledevice3': 'https://github.com/doronz88/apple-catalog'
+            'applecatalog': 'https://github.com/doronz88/applecatalog'
         },
     )
