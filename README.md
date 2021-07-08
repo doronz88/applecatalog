@@ -88,3 +88,18 @@ This should create an `Install macOS XXXXXX.app` application at your `/Applicati
 bootable device from this installation you can use the following official guidelines:
 
 https://support.apple.com/en-us/HT201372
+
+# Downloading latest XProtect files
+
+```
+➜  apple-catalog git:(master) applecatalog products xprotect download ./xprotect
+2021-07-08 12:05:30 DoronZ.local root[24986] DEBUG downloading: XProtectPlistConfigData_10_15.pkg
+100%|█████████████████████████████████████████████████████████████████████████████████████████████| 972k/972k [00:00<00:00, 109MiB/s]
+➜  apple-catalog git:(master) ✗ ll xprotect
+total 4744
+-rw-r--r--  1 z  staff   2.0M Jul  8 12:05 LegacyEntitlementAllowlist.plist
+-rw-r--r--  1 z  staff    23K Jul  8 12:05 XProtect.meta.plist
+-rw-r--r--  1 z  staff   111K Jul  8 12:05 XProtect.plist
+-rw-r--r--  1 z  staff   128K Jul  8 12:05 XProtect.yara
+-rw-r--r--  1 z  staff    28K Jul  8 12:05 gk.db
+```
