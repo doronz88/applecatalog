@@ -6,6 +6,22 @@
 Simple library for automating downloads of updates from Apple's servers. Use this simply tool for downloads macOS
 images, CommandLineTools, XProtect database and just everything you can think of :).
 
+# Installation
+
+You can either install using `pip`:
+
+```shell
+python3 -m pip install -U --user applecatalog
+```
+
+Or install locally from git:
+
+```shell
+git clone git@github.com:doronz88/applecatalog.git
+cd applecatalog
+python3 -m pip install -U --user -e .
+```
+
 # Usage
 
 ```
