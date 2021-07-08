@@ -1,3 +1,6 @@
+[![Python application](https://github.com/doronz88/applecatalog/workflows/Python%20application/badge.svg)](https://github.com/doronz88/applecatalog/actions/workflows/python-app.yml "Python application action")
+[![Pypi version](https://img.shields.io/pypi/v/applecatalog.svg)](https://pypi.org/project/applecatalog/ "PyPi package")
+
 # Description
 
 Simple library for automating downloads of updates from Apple's servers. Use this simply tool for downloads macOS
