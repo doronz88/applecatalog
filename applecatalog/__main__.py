@@ -19,10 +19,17 @@ def extract_package(filename, out_dir):
     assert 0 == os.system(f'tar xf "{payload}" -C "{out_dir}"')
 
 
-def get_xprotect_product(catalog: Catalog):
+def get_unique_product(catalog: Catalog, match):
+    products = []
     for product in catalog.products(detailed=False):
-        if product.basename and 'XProtect' in product.basename:
-            return product
+        if product.basename and match in product.basename:
+            products.append(product)
+    assert len(products) == 1
+    return products[0]
+
+
+def get_xprotect_product(catalog: Catalog):
+    return get_unique_product(catalog, 'XProtect')
 
 
 class Command(click.Command):
