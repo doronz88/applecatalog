@@ -41,3 +41,50 @@ Product(id='041-88172', version='2.0.1', title='Dictation Language Update - Chin
 ...
 ```
 
+# Downloading macOS Images
+
+Listing macOS images can be done as follows:
+
+```
+➜  apple-catalog git:(master) ✗ applecatalog products macos list
+MacOsProduct(product='061-26578', name=None, build='18F2059', version='10.14.5')
+MacOsProduct(product='061-26589', name=None, build='18G103', version='10.14.6')
+MacOsProduct(product='041-91758', name=None, build='17G66', version='10.13.6')
+MacOsProduct(product='041-88800', name=None, build='18E2034', version='10.14.4')
+MacOsProduct(product='041-90855', name=None, build='17F66a', version='10.13.5')
+MacOsProduct(product='061-86291', name=None, build='19D2064', version='10.15.3')
+MacOsProduct(product='001-04366', name=None, build='19E2269', version='10.15.4')
+MacOsProduct(product='001-15219', name=None, build='19F2200', version='10.15.5')
+MacOsProduct(product='001-36735', name=None, build='19G2006', version='10.15.6')
+MacOsProduct(product='001-36801', name=None, build='19G2021', version='10.15.6')
+MacOsProduct(product='001-51042', name=None, build='19H2', version='10.15.7')
+MacOsProduct(product='001-57224', name=None, build='19H4', version='10.15.7')
+MacOsProduct(product='001-68446', name=None, build='19H15', version='10.15.7')
+MacOsProduct(product='071-14766', name='macOS Big Sur', build='20D91', version='11.2.3')
+MacOsProduct(product='071-29172', name='macOS Big Sur', build='20E232', version='11.3')
+MacOsProduct(product='071-32414', name='macOS Big Sur', build='20E241', version='11.3.1')
+MacOsProduct(product='071-00696', name='macOS Big Sur', build='20F71', version='11.4')
+MacOsProduct(product='071-52235', name='macOS Big Sur Beta', build='20G5042c', version='11.5')
+MacOsProduct(product='071-59953', name='macOS Monterey beta', build='21A5268h', version='12.0')
+```
+
+For Downloading each one you just download their packages as you would for any other product:
+
+```
+➜  apple-catalog git:(master) ✗ applecatalog products download 071-59953 ~/Downloads/macos
+2021-07-08 10:48:27 DoronZ.local root[21530] DEBUG downloading: UpdateBrain.zip
+100%|██████████████████████████████████████████████████████████████████████████████████████████| 2.75M/2.75M [00:00<00:00, 44.7MiB/s]
+2021-07-08 10:48:27 DoronZ.local root[21530] DEBUG downloading: Info.plist
+...
+```
+
+For creating an installation from these files you can now simply:
+
+```shell
+sudo installer -pkg /path/to/InstallAssistant.pkg -target /
+```
+
+This should create an `Install macOS XXXXXX.app` application at your `/Applications` folder. If you wish to make a
+bootable device from this installation you can use the following official guidelines:
+
+https://support.apple.com/en-us/HT201372
