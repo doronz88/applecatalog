@@ -1,4 +1,6 @@
 import logging
+import shutil
+import tempfile
 import os
 
 import click
@@ -9,6 +11,18 @@ from applecatalog.catalog import Catalog
 coloredlogs.install(level=logging.DEBUG)
 
 logging.getLogger('urllib3.connectionpool').disabled = True
+
+
+def extract_package(filename, out_dir):
+    assert 0 == os.system(f'pkgutil --expand "{filename}" "{out_dir}"')
+    payload = os.path.join(out_dir, 'Payload')
+    assert 0 == os.system(f'tar xf "{payload}" -C "{out_dir}"')
+
+
+def get_xprotect_product(catalog: Catalog):
+    for product in catalog.products(detailed=False):
+        if product.basename and 'XProtect' in product.basename:
+            return product
 
 
 class Command(click.Command):
@@ -73,6 +87,47 @@ def macos_list(catalog):
     """ list all macos products """
     for k in catalog.macos_products:
         print(k)
+
+
+@products.group()
+def xprotect():
+    """ xprotect products options """
+    pass
+
+
+@xprotect.command('date', cls=Command)
+def xprotect_date(catalog):
+    """ XProtect update date """
+    product = get_xprotect_product(catalog)
+    print(product.date)
+
+
+@xprotect.command('download', cls=Command)
+@click.argument('out_path', type=click.Path(dir_okay=True, file_okay=False, exists=False))
+def xprotect_download(catalog, out_path):
+    """ download latest xprotect rules """
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+
+    product = get_xprotect_product(catalog)
+
+    with tempfile.TemporaryDirectory() as download_temp_dir:
+        # download XProtect package
+        results = catalog.download(product.id, download_temp_dir)
+
+        # verify exactly one was found
+        assert len(results) == 1, 'expected exactly one result'
+
+        # extract the XProtect package
+        package_temp_dir = os.path.join(download_temp_dir, 'package')
+        extract_package(results[0], package_temp_dir)
+        resource_dir = os.path.join(package_temp_dir,
+                                    'Library/Apple/System/Library/CoreServices/XProtect.bundle/Contents/Resources')
+
+        for filename in os.listdir(resource_dir):
+            # copy to target directory
+            filename = os.path.join(resource_dir, filename)
+            shutil.copyfile(filename, os.path.join(out_path, os.path.basename(filename)))
 
 
 if __name__ == '__main__':

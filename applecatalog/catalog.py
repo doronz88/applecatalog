@@ -91,6 +91,8 @@ class Catalog:
                                version=auxinfo.get('VERSION'))
 
     def download(self, product_id: str, out_dir: str):
+        results = []
         product = self._catalog['Products'][product_id]
         for package in product['Packages']:
-            download_file(package['URL'], out_dir)
+            results.append(download_file(package['URL'], out_dir))
+        return results
