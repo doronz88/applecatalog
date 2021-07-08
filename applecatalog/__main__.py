@@ -133,6 +133,7 @@ def xprotect_download(catalog, out_path):
 
         for filename in os.listdir(resource_dir):
             # copy to target directory
+            logging.debug(f'copying {filename} from extracted package...')
             filename = os.path.join(resource_dir, filename)
             shutil.copyfile(filename, os.path.join(out_path, os.path.basename(filename)))
 
