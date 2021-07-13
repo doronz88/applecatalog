@@ -1,11 +1,11 @@
 import logging
+import os
 import shutil
 import tempfile
-import os
+from pprint import pprint
 
 import click
 import coloredlogs
-
 from applecatalog.catalog import Catalog
 
 coloredlogs.install(level=logging.DEBUG)
@@ -81,6 +81,13 @@ def products_download(catalog, product_id, out_dir):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     catalog.download(product_id, out_dir)
+
+
+@products.command('info', cls=Command)
+@click.argument('product_id')
+def products_info(catalog, product_id):
+    """ query info for a single product """
+    pprint(catalog.get_product(product_id))
 
 
 @products.group()

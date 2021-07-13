@@ -43,8 +43,11 @@ class Catalog:
     def date(self):
         return self._catalog.get('IndexDate', None)
 
+    def get_product(self, product_id: str):
+        return self._catalog['Products'].get(product_id)
+
     def get_product_info(self, product_id: str, detailed=True):
-        product = self._catalog['Products'][product_id]
+        product = self.get_product(product_id)
         date = product.get('PostDate')
         title = None
         version = None
