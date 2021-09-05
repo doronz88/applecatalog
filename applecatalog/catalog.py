@@ -19,7 +19,7 @@ def download_file(url, out_dir):
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         total_size_in_bytes = int(r.headers.get('content-length', 0))
-        progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
+        progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True, dynamic_ncols=True)
 
         with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
