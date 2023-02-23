@@ -3,7 +3,7 @@ import os
 from setuptools import find_packages, setup
 
 BASE_DIR = os.path.realpath(os.path.dirname(__file__))
-VERSION = '1.0.0'
+VERSION = '2.0.0'
 
 
 def parse_requirements():
