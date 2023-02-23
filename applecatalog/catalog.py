@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Generator, List, Mapping
 
 import requests
-from parameter_decorators import str_to_path
 from tqdm import tqdm
 
 APPLE_SEED_URL = 'https://swscan.apple.com/content/catalogs/others/index-13-12-10.16-10.15-10.14-10.13-10.12-10.11-' \
@@ -96,7 +95,6 @@ class Catalog:
             yield MacOsProductInfo(product=product_id, name=name, build=auxinfo.get('BUILD'),
                                    version=auxinfo.get('VERSION'))
 
-    @str_to_path('out_dir')
     def download(self, product_id: str, out_dir: Path) -> List[Path]:
         results = []
         product = self._catalog['Products'][product_id]

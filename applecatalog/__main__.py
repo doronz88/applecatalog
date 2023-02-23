@@ -43,61 +43,36 @@ def date():
     print(Catalog().date)
 
 
-@cli.group()
-def products():
-    """ products options """
-    pass
-
-
-@products.command('list')
+@cli.command('list')
+@click.option('--macos', is_flag=True)
 @click.option('-q', '--quick', is_flag=True, help='don\'t require extended information')
-def products_list(quick):
+def list(macos: bool, quick: bool):
     """ list all products """
-    for product in Catalog().products(detailed=not quick):
+
+    catalog = Catalog()
+    if macos:
+        for k in catalog.macos_products:
+            print(k)
+        return
+    for product in catalog.products(detailed=not quick):
         print(product)
 
 
-@products.command('download')
+@cli.command('download')
 @click.argument('product_id')
 @click.argument('out_dir', type=click.Path(dir_okay=True, exists=False))
-def products_download(product_id: str, out_dir: str):
+def download(product_id: str, out_dir: str):
     """ download a single product packages """
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
+    out_dir = Path(out_dir)
+    out_dir.mkdir(exist_ok=True, parents=True)
     Catalog().download(product_id, out_dir)
 
 
-@products.command('info')
+@cli.command('info')
 @click.argument('product_id')
-def products_info(product_id: str):
+def info(product_id: str):
     """ query info for a single product """
     pprint(Catalog().get_product(product_id))
-
-
-@products.group()
-def macos():
-    """ macos products options """
-    pass
-
-
-@macos.command('list')
-def macos_list():
-    """ list all macos products """
-    for k in Catalog().macos_products:
-        print(k)
-
-
-@products.group()
-def xprotect():
-    """ xprotect products options """
-    pass
-
-
-@xprotect.command('date')
-def xprotect_date():
-    """ XProtect update date """
-    product = get_xprotect_product()
-    print(product.date)
 
 
 if __name__ == '__main__':
