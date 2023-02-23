@@ -6,6 +6,7 @@ from pprint import pprint
 
 import click
 import coloredlogs
+
 from applecatalog.catalog import Catalog
 
 coloredlogs.install(level=logging.DEBUG)
