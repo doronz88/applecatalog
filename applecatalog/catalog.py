@@ -1,22 +1,25 @@
+import datetime
 import gzip
 import logging
-import os
 import plistlib
 from collections import namedtuple
+from pathlib import Path
+from typing import Generator, List, Mapping
 
 import requests
+from parameter_decorators import str_to_path
 from tqdm import tqdm
 
 APPLE_SEED_URL = 'https://swscan.apple.com/content/catalogs/others/index-13-12-10.16-10.15-10.14-10.13-10.12-10.11-' \
                  '10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz'
-MacOsProduct = namedtuple('MacOsProduct', 'product name build version')
-Product = namedtuple('Product', 'id version title date basename')
+MacOsProductInfo = namedtuple('MacOsProduct', 'product name build version')
+ProductInfo = namedtuple('ProductInfo', 'id version title date basename')
 
 
-def download_file(url, out_dir):
+def download_file(url: str, out_dir: Path) -> Path:
     local_filename = url.split('/')[-1]
     logging.debug(f'downloading: {local_filename}')
-    local_filename = os.path.join(out_dir, local_filename)
+    local_filename = out_dir / local_filename
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         total_size_in_bytes = int(r.headers.get('content-length', 0))
@@ -32,23 +35,21 @@ def download_file(url, out_dir):
 
 
 class Catalog:
-    def __init__(self, type_='seed'):
-        self._type = type_
+    def __init__(self):
         self._catalog = {}
         self.reload()
 
-    def reload(self):
-        self._catalog = plistlib.loads(
-            gzip.decompress(requests.get(APPLE_SEED_URL.format(type=self._type), verify=False).content))
+    def reload(self) -> None:
+        self._catalog = plistlib.loads(gzip.decompress(requests.get(APPLE_SEED_URL, verify=False).content))
 
     @property
-    def date(self):
+    def date(self) -> datetime.datetime:
         return self._catalog.get('IndexDate', None)
 
-    def get_product(self, product_id: str):
+    def get_product(self, product_id: str) -> Mapping:
         return self._catalog['Products'].get(product_id)
 
-    def get_product_info(self, product_id: str, detailed=True):
+    def get_product_info(self, product_id: str, detailed=True) -> ProductInfo:
         product = self.get_product(product_id)
         date = product.get('PostDate')
         title = None
@@ -64,14 +65,14 @@ class Catalog:
                 if english is None:
                     english = localization.get('en')
                 title = english['title']
-        return Product(id=product_id, version=version, title=title, date=date, basename=basename)
+        return ProductInfo(id=product_id, version=version, title=title, date=date, basename=basename)
 
-    def products(self, detailed=True):
+    def products(self, detailed=True) -> Generator[ProductInfo, None, None]:
         for product_id, product in self._catalog['Products'].items():
             yield self.get_product_info(product_id, detailed=detailed)
 
     @property
-    def macos_products(self):
+    def macos_products(self) -> Generator[MacOsProductInfo, None, None]:
         for product_id, product in self._catalog['Products'].items():
             extended_meta_info = product.get('ExtendedMetaInfo')
             if extended_meta_info is None:
@@ -92,10 +93,11 @@ class Catalog:
             auxinfo = metadata.split('<auxinfo>')[1].split('</auxinfo>')[0].encode()
             auxinfo = plistlib.loads(b'<plist version="1.0">' + auxinfo + b'</plist>')
 
-            yield MacOsProduct(product=product_id, name=name, build=auxinfo.get('BUILD'),
-                               version=auxinfo.get('VERSION'))
+            yield MacOsProductInfo(product=product_id, name=name, build=auxinfo.get('BUILD'),
+                                   version=auxinfo.get('VERSION'))
 
-    def download(self, product_id: str, out_dir: str):
+    @str_to_path('out_dir')
+    def download(self, product_id: str, out_dir: Path) -> List[Path]:
         results = []
         product = self._catalog['Products'][product_id]
         for package in product['Packages']:

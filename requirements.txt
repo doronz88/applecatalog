@@ -2,3 +2,4 @@ coloredlogs
 tqdm
 click
 requests
+parameter_decorators
