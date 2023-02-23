@@ -11,7 +11,7 @@ images, CommandLineTools, XProtect database and just everything you can think of
 You can either install using `pip`:
 
 ```shell
-python3 -m pip install -U --user applecatalog
+python3 -m pip install -U applecatalog
 ```
 
 Or install locally from git:
@@ -19,23 +19,39 @@ Or install locally from git:
 ```shell
 git clone git@github.com:doronz88/applecatalog.git
 cd applecatalog
-python3 -m pip install -U --user -e .
+python3 -m pip install -U -e .
 ```
 
 # Usage
 
 ```
-Usage: applecatalog [OPTIONS] COMMAND [ARGS]...
+Usage: python -m applecatalog [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --help  Show this message and exit.
 
 Commands:
   date      last update date
-  products  products options
+  download  download a single product packages
+  info      query info for a single product
+  list      list all products
 ```
 
-## Example
+## Snippets
+
+```shell
+# List CommandLineTools
+python3 -m applecatalog list -q | grep CLTools
+
+# List macOS
+python3 -m applecatalog list --macos
+
+# Download single component (by given PRODUCT_ID)
+python3 -m applecatalog download PRODUCT_ID /tmp
+
+```
+
+## Example output
 
 ```
 ➜  dev applecatalog products list
@@ -62,7 +78,7 @@ Product(id='041-88172', version='2.0.1', title='Dictation Language Update - Chin
 Listing macOS images can be done as follows:
 
 ```
-➜  apple-catalog git:(master) ✗ applecatalog products macos list
+➜  apple-catalog git:(master) ✗ applecatalog products list --macos
 MacOsProduct(product='061-26578', name=None, build='18F2059', version='10.14.5')
 MacOsProduct(product='061-26589', name=None, build='18G103', version='10.14.6')
 MacOsProduct(product='041-91758', name=None, build='17G66', version='10.13.6')
@@ -104,18 +120,3 @@ This should create an `Install macOS XXXXXX.app` application at your `/Applicati
 bootable device from this installation you can use the following official guidelines:
 
 https://support.apple.com/en-us/HT201372
-
-# Downloading latest XProtect files
-
-```
-➜  apple-catalog git:(master) applecatalog products xprotect download ./xprotect
-2021-07-08 12:05:30 DoronZ.local root[24986] DEBUG downloading: XProtectPlistConfigData_10_15.pkg
-100%|█████████████████████████████████████████████████████████████████████████████████████████████| 972k/972k [00:00<00:00, 109MiB/s]
-➜  apple-catalog git:(master) ✗ ll xprotect
-total 4744
--rw-r--r--  1 z  staff   2.0M Jul  8 12:05 LegacyEntitlementAllowlist.plist
--rw-r--r--  1 z  staff    23K Jul  8 12:05 XProtect.meta.plist
--rw-r--r--  1 z  staff   111K Jul  8 12:05 XProtect.plist
--rw-r--r--  1 z  staff   128K Jul  8 12:05 XProtect.yara
--rw-r--r--  1 z  staff    28K Jul  8 12:05 gk.db
-```
