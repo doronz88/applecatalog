@@ -7,7 +7,7 @@ from collections import namedtuple
 import requests
 from tqdm import tqdm
 
-APPLE_SEED_URL = 'https://swscan.apple.com/content/catalogs/others/index-10.16{type}-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz'
+APPLE_SEED_URL = 'https://swscan.apple.com/content/catalogs/others/index-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz'
 MacOsProduct = namedtuple('MacOsProduct', 'product name build version')
 Product = namedtuple('Product', 'id version title date basename')
 
@@ -37,7 +37,8 @@ class Catalog:
         self.reload()
 
     def reload(self):
-        self._catalog = plistlib.loads(gzip.decompress(requests.get(APPLE_SEED_URL.format(type=self._type)).content))
+        self._catalog = plistlib.loads(
+            gzip.decompress(requests.get(APPLE_SEED_URL.format(type=self._type), verify=False).content))
 
     @property
     def date(self):

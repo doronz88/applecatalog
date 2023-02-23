@@ -1,5 +1,6 @@
-from setuptools import setup, find_packages
 import os
+
+from setuptools import find_packages, setup
 
 BASE_DIR = os.path.realpath(os.path.dirname(__file__))
 VERSION = '0.0.6'
@@ -39,10 +40,11 @@ if __name__ == '__main__':
                                 ],
         },
         classifiers=[
-            'Programming Language :: Python :: 3.6',
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
+            'Programming Language :: Python :: 3.10',
+            'Programming Language :: Python :: 3.11',
         ],
         url='https://github.com/doronz88/applecatalog',
         project_urls={
