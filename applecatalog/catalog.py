@@ -7,10 +7,13 @@ from pathlib import Path
 from typing import Generator, List, Mapping
 
 import requests
+import urllib3
 from tqdm import tqdm
 
-APPLE_SEED_URL = 'https://swscan.apple.com/content/catalogs/others/index-13-12-10.16-10.15-10.14-10.13-10.12-10.11-' \
-                 '10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz'
+urllib3.disable_warnings()
+
+APPLE_SEED_URL = 'https://swscan.apple.com/content/catalogs/others/index-14-13-12-10.16-10.15-10.14-10.13-10.12-10.11' \
+                 '-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz'
 MacOsProductInfo = namedtuple('MacOsProduct', 'product name build version')
 ProductInfo = namedtuple('ProductInfo', 'id version title date basename')
 
