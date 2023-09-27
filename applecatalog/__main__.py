@@ -11,6 +11,7 @@ from applecatalog.catalog import Catalog, ProductInfo
 coloredlogs.install(level=logging.DEBUG)
 
 logging.getLogger('urllib3.connectionpool').disabled = True
+logging.getLogger('charset_normalizer').disabled = True
 
 
 def extract_package(filename: Path, out_dir: Path) -> None:
