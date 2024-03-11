@@ -1,5 +1,4 @@
 import datetime
-import gzip
 import logging
 import plistlib
 from collections import namedtuple
@@ -42,7 +41,7 @@ class Catalog:
         self.reload()
 
     def reload(self) -> None:
-        self._catalog = plistlib.loads(gzip.decompress(requests.get(APPLE_SEED_URL, verify=False).content))
+        self._catalog = plistlib.loads(requests.get(APPLE_SEED_URL, verify=False).content)
 
     @property
     def date(self) -> datetime.datetime:
