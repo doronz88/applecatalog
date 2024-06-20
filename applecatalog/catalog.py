@@ -11,8 +11,8 @@ from tqdm import tqdm
 
 urllib3.disable_warnings()
 
-APPLE_SEED_URL = 'https://swscan.apple.com/content/catalogs/others/index-14-13-12-10.16-10.15-10.14-10.13-10.12-10.11' \
-                 '-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz'
+APPLE_SEED_URL = ('https://swscan.apple.com/content/catalogs/others/index-15seed-15-14-13-12-10.16-10.15-10.14-10.13-'
+                  '10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz')
 MacOsProductInfo = namedtuple('MacOsProduct', 'product name build version')
 ProductInfo = namedtuple('ProductInfo', 'id version title date basename')
 
