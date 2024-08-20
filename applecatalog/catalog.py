@@ -11,8 +11,6 @@ from tqdm import tqdm
 
 urllib3.disable_warnings()
 
-APPLE_SEED_URL = ('https://swscan.apple.com/content/catalogs/others/index-15seed-15-14-13-12-10.16-10.15-10.14-10.13-'
-                  '10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz')
 MacOsProductInfo = namedtuple('MacOsProduct', 'product name build version')
 ProductInfo = namedtuple('ProductInfo', 'id version title date basename')
 
@@ -36,12 +34,15 @@ def download_file(url: str, out_dir: Path) -> Path:
 
 
 class Catalog:
+    URL = ('https://swscan.apple.com/content/catalogs/others/index-15seed-15-14-13-12-10.16-10.15-10.14-10.13-'
+           '10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz')
+
     def __init__(self):
         self._catalog = {}
         self.reload()
 
     def reload(self) -> None:
-        self._catalog = plistlib.loads(requests.get(APPLE_SEED_URL, verify=False).content)
+        self._catalog = plistlib.loads(requests.get(self.URL, verify=False).content)
 
     @property
     def date(self) -> datetime.datetime:
@@ -72,6 +73,19 @@ class Catalog:
         for product_id, product in self._catalog['Products'].items():
             yield self.get_product_info(product_id, detailed=detailed)
 
+    def download(self, product_id: str, out_dir: Path) -> List[Path]:
+        results = []
+        product = self._catalog['Products'][product_id]
+        for package in product['Packages']:
+            results.append(download_file(package['URL'], out_dir))
+        return results
+
+
+class MacOsCatalog(Catalog):
+    def __init__(self):
+        self._catalog = {}
+        self.reload()
+
     @property
     def macos_products(self) -> Generator[MacOsProductInfo, None, None]:
         for product_id, product in self._catalog['Products'].items():
@@ -97,9 +111,35 @@ class Catalog:
             yield MacOsProductInfo(product=product_id, name=name, build=auxinfo.get('BUILD'),
                                    version=auxinfo.get('VERSION'))
 
-    def download(self, product_id: str, out_dir: Path) -> List[Path]:
-        results = []
-        product = self._catalog['Products'][product_id]
-        for package in product['Packages']:
-            results.append(download_file(package['URL'], out_dir))
-        return results
+
+class RosettaCatalog(Catalog):
+    URL = 'https://swscan.apple.com/content/catalogs/others/index-rosettaupdateauto-1.sucatalog.gz'
+
+    def __init__(self):
+        self._catalog = {}
+        self.reload()
+
+    @property
+    def macos_products(self) -> Generator[MacOsProductInfo, None, None]:
+        for product_id, product in self._catalog['Products'].items():
+            extended_meta_info = product.get('ExtendedMetaInfo')
+            if extended_meta_info is None:
+                continue
+
+            if 'InstallAssistantPackageIdentifiers' not in extended_meta_info:
+                continue
+
+            metadata = requests.get(product['Distributions']['English']).text
+            if 'auxinfo' not in metadata:
+                continue
+
+            name = metadata.split('<title>')[1].split('<')[0]
+
+            if name == 'SU_TITLE':
+                name = None
+
+            auxinfo = metadata.split('<auxinfo>')[1].split('</auxinfo>')[0].encode()
+            auxinfo = plistlib.loads(b'<plist version="1.0">' + auxinfo + b'</plist>')
+
+            yield MacOsProductInfo(product=product_id, name=name, build=auxinfo.get('BUILD'),
+                                   version=auxinfo.get('VERSION'))

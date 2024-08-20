@@ -1,12 +1,11 @@
 import logging
-import os
 from pathlib import Path
 from pprint import pprint
 
 import click
 import coloredlogs
 
-from applecatalog.catalog import Catalog, ProductInfo
+from applecatalog.catalog import Catalog, MacOsCatalog, RosettaCatalog
 
 coloredlogs.install(level=logging.DEBUG)
 
@@ -14,44 +13,30 @@ logging.getLogger('urllib3.connectionpool').disabled = True
 logging.getLogger('charset_normalizer').disabled = True
 
 
-def extract_package(filename: Path, out_dir: Path) -> None:
-    assert 0 == os.system(f'pkgutil --expand "{filename}" "{out_dir}"')
-    payload = os.path.join(out_dir, 'Payload')
-    assert 0 == os.system(f'tar xf "{payload}" -C "{out_dir}"')
-
-
-def get_unique_product(match: str) -> ProductInfo:
-    products = []
-    for product in Catalog().products(detailed=False):
-        if product.basename and match in product.basename:
-            products.append(product)
-    assert len(products) == 1
-    return products[0]
-
-
-def get_xprotect_product() -> ProductInfo:
-    return get_unique_product('XProtectPayloads')
-
-
 @click.group()
-def cli():
-    pass
+@click.argument('catalog', type=click.Choice(['macos', 'rosetta']))
+@click.pass_context
+def cli(ctx: click.Context, catalog: str) -> None:
+    """ CLI util for downloading updates from either macos/rosetta seeds """
+    ctx.ensure_object(Catalog)
+    ctx.obj = MacOsCatalog() if catalog == 'macos' else RosettaCatalog()
 
 
 @cli.command()
-def date():
+@click.pass_context
+def date(ctx: click.Context) -> None:
     """ last update date """
-    print(Catalog().date)
+    print(ctx.obj.date)
 
 
 @cli.command('list')
-@click.option('--macos', is_flag=True)
+@click.pass_context
+@click.option('--os', is_flag=True)
 @click.option('-q', '--quick', is_flag=True, help='don\'t require extended information')
-def list(macos: bool, quick: bool):
+def list(ctx: click.Context, os: bool, quick: bool) -> None:
     """ list all products """
-
-    catalog = Catalog()
-    if macos:
+    catalog = ctx.obj
+    if os:
         for k in catalog.macos_products:
             print(k)
         return
@@ -60,20 +45,22 @@ def list(macos: bool, quick: bool):
 
 
 @cli.command('download')
+@click.pass_context
 @click.argument('product_id')
 @click.argument('out_dir', type=click.Path(dir_okay=True, exists=False))
-def download(product_id: str, out_dir: str):
+def download(ctx: click.Context, product_id: str, out_dir: str) -> None:
     """ download a single product packages """
     out_dir = Path(out_dir)
     out_dir.mkdir(exist_ok=True, parents=True)
-    Catalog().download(product_id, out_dir)
+    ctx.obj.download(product_id, out_dir)
 
 
 @cli.command('info')
 @click.argument('product_id')
-def info(product_id: str):
+@click.pass_context
+def info(ctx: click.Context, product_id: str) -> None:
     """ query info for a single product """
-    pprint(Catalog().get_product(product_id))
+    pprint(ctx.obj.get_product(product_id))
 
 
 if __name__ == '__main__':
