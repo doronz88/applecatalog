@@ -25,7 +25,9 @@ python3 -m pip install -U -e .
 # Usage
 
 ```
-Usage: python -m applecatalog [OPTIONS] COMMAND [ARGS]...
+Usage: applecatalog [OPTIONS] {macos|rosetta} COMMAND [ARGS]...
+
+  CLI util for downloading updates from either macos/rosetta seeds
 
 Options:
   --help  Show this message and exit.
@@ -41,20 +43,20 @@ Commands:
 
 ```shell
 # List CommandLineTools
-python3 -m applecatalog list -q | grep CLTools
+python3 -m applecatalog macos list -q | grep CLTools
 
 # List macOS
-python3 -m applecatalog list --macos
+python3 -m applecatalog macos list --macos
 
 # Download single component (by given PRODUCT_ID)
-python3 -m applecatalog download PRODUCT_ID /tmp
+python3 -m applecatalog macos download PRODUCT_ID /tmp
 
 ```
 
 ## Example output
 
 ```
-➜  dev applecatalog products list
+➜  dev applecatalog macos products list
 Product(id='031-17335', version='11.0.0.0', title='Photo Content Catalogs', date=datetime.datetime(2015, 2, 23, 18, 1, 41), basename='PhotoContentCatalogs.smd')
 Product(id='031-17334', version='11.0.0.0', title='Photo Content Themes', date=datetime.datetime(2015, 2, 23, 18, 1, 41), basename='PhotoContentThemes.smd')
 Product(id='031-18981', version='17.0.0.0', title='Photo Content Catalogs', date=datetime.datetime(2015, 3, 25, 17, 12, 1), basename='PhotoContentCatalogs.smd')
@@ -78,7 +80,7 @@ Product(id='041-88172', version='2.0.1', title='Dictation Language Update - Chin
 Listing macOS images can be done as follows:
 
 ```
-➜  apple-catalog git:(master) ✗ applecatalog products list --macos
+➜  apple-catalog git:(master) ✗ applecatalog macos products list --macos
 MacOsProduct(product='061-26578', name=None, build='18F2059', version='10.14.5')
 MacOsProduct(product='061-26589', name=None, build='18G103', version='10.14.6')
 MacOsProduct(product='041-91758', name=None, build='17G66', version='10.13.6')
@@ -103,7 +105,7 @@ MacOsProduct(product='071-59953', name='macOS Monterey beta', build='21A5268h', 
 For Downloading each one you just download their packages as you would for any other product:
 
 ```
-➜  apple-catalog git:(master) ✗ applecatalog products download 071-59953 ~/Downloads/macos
+➜  apple-catalog git:(master) ✗ applecatalog macos products download 071-59953 ~/Downloads/macos
 2021-07-08 10:48:27 DoronZ.local root[21530] DEBUG downloading: UpdateBrain.zip
 100%|██████████████████████████████████████████████████████████████████████████████████████████| 2.75M/2.75M [00:00<00:00, 44.7MiB/s]
 2021-07-08 10:48:27 DoronZ.local root[21530] DEBUG downloading: Info.plist

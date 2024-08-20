@@ -45,4 +45,4 @@ jobs:
         python -m pip install -U .
     - name: Test query
       run: |
-        python -m applecatalog list -q
+        python -m applecatalog macos list -q
