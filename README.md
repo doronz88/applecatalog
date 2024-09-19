@@ -45,8 +45,14 @@ Commands:
 # List CommandLineTools
 python3 -m applecatalog macos list -q | grep CLTools
 
-# List macOS
-python3 -m applecatalog macos list --macos
+# List all macOS products
+python3 -m applecatalog macos list
+
+# List macOS OS installers
+python3 -m applecatalog macos list --os -q
+
+# List rosetta installers
+python3 -m applecatalog rosetta list -q
 
 # Download single component (by given PRODUCT_ID)
 python3 -m applecatalog macos download PRODUCT_ID /tmp
