@@ -52,7 +52,7 @@ class Catalog:
     def get_product(self, product_id: str) -> dict:
         return self._catalog['Products'].get(product_id)
 
-    def get_product_info(self, product_id: str, detailed: bool = True) -> ProductInfo:
+    def get_product_info(self, product_id: str, detailed: bool = True) -> ProductInfo | RosettaProductInfo:
         product = self.get_product(product_id)
         date = product.get('PostDate')
         title = None
