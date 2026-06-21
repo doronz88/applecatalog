@@ -11,21 +11,21 @@ from tqdm import tqdm
 
 urllib3.disable_warnings()
 
-RosettaProductInfo = namedtuple('RosettaProduct', 'id date build macos_version')
-MacOsProductInfo = namedtuple('MacOsProduct', 'product name build version')
-ProductInfo = namedtuple('ProductInfo', 'id version title date basename')
+RosettaProductInfo = namedtuple("RosettaProduct", "id date build macos_version")
+MacOsProductInfo = namedtuple("MacOsProduct", "product name build version")
+ProductInfo = namedtuple("ProductInfo", "id version title date basename")
 
 
 def download_file(url: str, out_dir: Path) -> Path:
-    local_filename = url.split('/')[-1]
-    logging.debug(f'downloading: {local_filename}')
+    local_filename = url.split("/")[-1]
+    logging.debug(f"downloading: {local_filename}")
     local_filename = out_dir / local_filename
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        total_size_in_bytes = int(r.headers.get('content-length', 0))
-        progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True, dynamic_ncols=True)
+        total_size_in_bytes = int(r.headers.get("content-length", 0))
+        progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True, dynamic_ncols=True)
 
-        with open(local_filename, 'wb') as f:
+        with open(local_filename, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
                 progress_bar.update(len(chunk))
                 f.write(chunk)
@@ -35,8 +35,7 @@ def download_file(url: str, out_dir: Path) -> Path:
 
 
 class Catalog:
-    URL = ('https://swscan.apple.com/content/catalogs/others/index-15seed-15-14-13-12-10.16-10.15-10.14-10.13-'
-           '10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz')
+    URL = "https://swscan.apple.com/content/catalogs/others/index-27seed-27-26-15-14-13-12-10.16-10.15-10.14-10.13-10.12-10.11-10.10-10.9-mountainlion-lion-snowleopard-leopard.merged-1.sucatalog.gz"
 
     def __init__(self):
         self._catalog = {}
@@ -47,82 +46,86 @@ class Catalog:
 
     @property
     def date(self) -> Optional[datetime.datetime]:
-        return self._catalog.get('IndexDate', None)
+        return self._catalog.get("IndexDate", None)
 
     def get_product(self, product_id: str) -> dict:
-        return self._catalog['Products'].get(product_id)
+        return self._catalog["Products"].get(product_id)
 
     def get_product_info(self, product_id: str, detailed: bool = True) -> ProductInfo | RosettaProductInfo:
         product = self.get_product(product_id)
-        date = product.get('PostDate')
+        date = product.get("PostDate")
         title = None
         version = None
         basename = None
-        if 'ServerMetadataURL' in product:
-            basename = product['ServerMetadataURL'].split('/')[-1]
+        if "ServerMetadataURL" in product:
+            basename = product["ServerMetadataURL"].split("/")[-1]
             if detailed:
-                metadata = plistlib.loads(requests.get(product['ServerMetadataURL']).content)
-                version = metadata.get('CFBundleShortVersionString')
-                localization = metadata['localization']
-                english = localization.get('English')
+                metadata = plistlib.loads(requests.get(product["ServerMetadataURL"]).content)
+                version = metadata.get("CFBundleShortVersionString")
+                localization = metadata["localization"]
+                english = localization.get("English")
                 if english is None:
-                    english = localization.get('en')
-                title = english['title']
+                    english = localization.get("en")
+                title = english["title"]
         return ProductInfo(id=product_id, version=version, title=title, date=date, basename=basename)
 
     def products(self, detailed: bool = True) -> Generator[ProductInfo, None, None]:
-        for product_id, product in self._catalog['Products'].items():
+        for product_id, product in self._catalog["Products"].items():
             yield self.get_product_info(product_id, detailed=detailed)
 
     def download(self, product_id: str, out_dir: Path) -> list[Path]:
         results = []
-        product = self._catalog['Products'][product_id]
-        for package in product['Packages']:
-            results.append(download_file(package['URL'], out_dir))
+        product = self._catalog["Products"][product_id]
+        for package in product["Packages"]:
+            results.append(download_file(package["URL"], out_dir))
         return results
 
 
 class MacOsCatalog(Catalog):
     @property
     def macos_products(self) -> Generator[MacOsProductInfo, None, None]:
-        for product_id, product in self._catalog['Products'].items():
-            extended_meta_info = product.get('ExtendedMetaInfo')
+        for product_id, product in self._catalog["Products"].items():
+            extended_meta_info = product.get("ExtendedMetaInfo")
             if extended_meta_info is None:
                 continue
 
-            if 'InstallAssistantPackageIdentifiers' not in extended_meta_info:
+            if "InstallAssistantPackageIdentifiers" not in extended_meta_info:
                 continue
 
-            metadata = requests.get(product['Distributions']['English']).text
-            if 'auxinfo' not in metadata:
+            metadata = requests.get(product["Distributions"]["English"]).text
+            if "auxinfo" not in metadata:
                 continue
 
-            name = metadata.split('<title>')[1].split('<')[0]
+            name = metadata.split("<title>")[1].split("<")[0]
 
-            if name == 'SU_TITLE':
+            if name == "SU_TITLE":
                 name = None
 
-            auxinfo = metadata.split('<auxinfo>')[1].split('</auxinfo>')[0].encode()
-            auxinfo = plistlib.loads(b'<plist version="1.0">' + auxinfo + b'</plist>')
+            auxinfo = metadata.split("<auxinfo>")[1].split("</auxinfo>")[0].encode()
+            auxinfo = plistlib.loads(b'<plist version="1.0">' + auxinfo + b"</plist>")
 
-            yield MacOsProductInfo(product=product_id, name=name, build=auxinfo.get('BUILD'),
-                                   version=auxinfo.get('VERSION'))
+            yield MacOsProductInfo(
+                product=product_id,
+                name=name,
+                build=auxinfo.get("BUILD"),
+                version=auxinfo.get("VERSION"),
+            )
 
 
 class RosettaCatalog(Catalog):
-    URL = 'https://swscan.apple.com/content/catalogs/others/index-rosettaupdateauto-1.sucatalog.gz'
+    URL = "https://swscan.apple.com/content/catalogs/others/index-rosettaupdateauto-1.sucatalog.gz"
 
     def get_product_info(self, product_id: str, detailed: bool = True) -> RosettaProductInfo:
         product = self.get_product(product_id)
-        date = product['PostDate']
-        build = product['ExtendedMetaInfo']['BuildVersion']
+        date = product["PostDate"]
+        build = product["ExtendedMetaInfo"]["BuildVersion"]
         macos_version = None
-        if 'ServerMetadataURL' in product:
+        if "ServerMetadataURL" in product:
             if detailed:
-                metadata = plistlib.loads(requests.get(product['ServerMetadataURL']).content)
-                macos_version = metadata.get('CFBundleShortVersionString')
+                metadata = plistlib.loads(requests.get(product["ServerMetadataURL"]).content)
+                macos_version = metadata.get("CFBundleShortVersionString")
         return RosettaProductInfo(id=product_id, macos_version=macos_version, date=date, build=build)
 
     def download(self, product_id: str, out_dir: Path) -> None:
-        product = self._catalog['Products'][product_id]
-        download_file(product['Packages'][0]['URL'], out_dir)
+        product = self._catalog["Products"][product_id]
+        download_file(product["Packages"][0]["URL"], out_dir)
