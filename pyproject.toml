@@ -44,6 +44,14 @@ version = {attr = "applecatalog._version.__version__"}
 [tool.setuptools_scm]
 version_file = "applecatalog/_version.py"
 
+[tool.ruff]
+line-length = 120
+extend-exclude = ["applecatalog/_version.py"]
+
+[tool.ruff.lint]
+# E/W: pycodestyle, F: pyflakes, I: isort
+select = ["E", "W", "F", "I"]
+
 [build-system]
 requires = ["setuptools>=43.0.0", "setuptools_scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
