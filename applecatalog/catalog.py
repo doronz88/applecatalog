@@ -1,6 +1,7 @@
 import datetime
 import logging
 import plistlib
+import re
 from collections import namedtuple
 from pathlib import Path
 from typing import Generator, Optional
@@ -67,6 +68,18 @@ class Catalog:
                 if english is None:
                     english = localization.get("en")
                 title = english["title"]
+        elif detailed and "English" in product.get("Distributions", {}):
+            # newer products (e.g. Command Line Tools for Xcode 27) ship no ServerMetadataURL, so fall back to the
+            # English distribution file and resolve its localized strings
+            metadata = requests.get(product["Distributions"]["English"]).text
+            strings = {}
+            if '<strings language="English">' in metadata:
+                english = metadata.split('<strings language="English">')[1].split("</strings>")[0]
+                strings = dict(re.findall(r'"([^"]+)" = "([^"]*)";', english))
+            if "<title>" in metadata:
+                title = metadata.split("<title>")[1].split("<")[0]
+                title = strings.get(title, title)
+            version = strings.get("SU_VERS")
         return ProductInfo(id=product_id, version=version, title=title, date=date, basename=basename)
 
     def products(self, detailed: bool = True) -> Generator[ProductInfo, None, None]:
